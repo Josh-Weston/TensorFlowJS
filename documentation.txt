@@ -1,0 +1,7 @@
+- Install tensorflowjs (npm install @tensorflow/tfjs)
+- Install tensorflowjs bindings so the same code will work in node and the browser (npm install @tensorflow/tfjs-node)
+- It doesn't look like tensorflowjs has native support for node on Windows, bummer
+- Activation function = transfer function
+- Model.predict(input) //argument passed to model.predict is an input class
+
+- This layer implements the operation: output = activation(dot(input, kernel) + bias)
