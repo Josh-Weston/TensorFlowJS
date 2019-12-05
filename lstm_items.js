@@ -1,41 +1,24 @@
-/* function buildTimeSeries() {
-
-    let timeSeries = tf.linspace(0, 9, 10);
-
-    for (var i = 0; i < 10; i++) {
-        timeSeries = timeSeries.concat(tf.linspace(9, 0, 10));
-        timeSeries = timeSeries.concat(tf.linspace(0, 9, 10));
-    }
-    return timeSeries;
-}
-
-let timeSeries = buildTimeSeries();
-timeSeries.print(); */
-fetch('./data/international-airline-passengers.json')
+fetch('./data/sales_item.json')
     .then(res => res.json())
     .catch(error => console.error(error))
     .then(buildModel);
 
-// const numEpochs = 30; 
-const numEpochs = 30;
+const numEpochs = 5;
 
 async function buildModel(data) {
     
+    console.log('here');
     //Build a single column time series, and scale it
     let timeSeries = data.map(el => +el[1]);
     let extent = d3.extent(timeSeries);
     let scale = d3.scaleLinear().domain(extent).range([0, 1]);
     timeSeries = timeSeries.map(el => scale(el));
 
-    //Holdout last 10 points
-    // let holdout = timeSeries.splice(timeSeries.length - 10);
-    // console.log(holdout);
-
     //Shift Y forward
     let lookBack = 1;
     let dataX = timeSeries;
     let dataY = timeSeries.slice(1);
-
+    
     //Split into train and test sets.
     let train_size = timeSeries.length * .67;
     let trainX = dataX.slice(0,train_size);
@@ -69,9 +52,6 @@ async function buildModel(data) {
     console.log('fitted');
     console.log(results);
 
-    // How to actually predict Y, using X? X is just Y here, it is not a time value
-    // but do we need that? This is like exponential smoothing. I predict my text 10, based on my first 10
-
     // Make predictions
     let trainPredict = model.predict(trainX);
     let testPredict = model.predict(testX);
@@ -95,13 +75,6 @@ async function buildModel(data) {
     //     return {x: i, original: data, color: 'original'};
     // });
 
-    let plotOriginalData = [];
-    unscaledX.forEach((el, i) => {
-        if (i < trainPredictData.length) {
-            plotOriginalData.push({x: i, original: el, color: 'original'});
-        }
-    });
-
     const spec = {
         '$schema': 'https://vega.github.io/schema/vega-lite/v2.json',
         'width': 500,
@@ -124,21 +97,19 @@ async function buildModel(data) {
                         {"field": "y", "type": "quantitative"}
                     ]
                 }
-            },
-            {
-                'data': {'values': plotOriginalData},
-                'mark': 'line',
-                'encoding': {
-                    'x': {'field': 'x', 'type': 'quantitative'},
-                    'y': {'field': 'original', 'type': 'quantitative'},
-                    'color': {'field': 'color', 'type': 'nominal'}
-                }
             }
+            // {
+            //     'data': {'values': plotOriginalData},
+            //     'mark': 'line',
+            //     'encoding': {
+            //         'x': {'field': 'x', 'type': 'quantitative'},
+            //         'y': {'field': 'original', 'type': 'quantitative'},
+            //         'color': {'field': 'color', 'type': 'nominal'}
+            //     }
+            // }
 
         ]
     };
 
     await this.vegaEmbed('#vis', spec);
-
 }
-
